@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ethical Governor: Dilemma</title>
+    <title>Ethical Governor: Full Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --bg-color: #222;
+            --bg-color: #0f0f13;
             --text-color: #eee;
-            --card-bg: #fff;
-            --card-text: #333;
-            /* 4대 자원 색상 */
-            --accent-trust: #4CAF50; /* 시민신뢰 - 초록 */
-            --accent-ethic: #9C27B0; /* 윤리정당 - 보라 */
-            --accent-intl: #2196F3;  /* 국제관계 - 파랑 */
-            --accent-stable: #FF9800; /* 국가안정 - 주황 */
+            --card-bg: #ffffff;
+            --card-text: #1a1a1a;
+            --accent-trust: #4CAF50;
+            --accent-ethic: #9C27B0;
+            --accent-intl: #2196F3;
+            --accent-stable: #FF9800;
+            --accent-main: #ffdd57;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-drag: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
-            font-family: 'Pretendard', -apple-system, sans-serif;
+            font-family: 'Pretendard', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             height: 100vh;
@@ -30,576 +30,391 @@
             overflow: hidden;
         }
 
-        /* 상단 게이지 영역 */
-        #stats-container {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 5px;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #444;
-        }
-
-        .stat-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 23%;
-        }
-
-        .stat-icon { font-size: 1.2rem; margin-bottom: 5px; }
+        #header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #333; z-index: 100; }
         
-        .stat-bar-bg {
-            width: 100%; height: 6px; background: #444;
-            border-radius: 3px; overflow: hidden; margin-bottom: 4px;
-        }
+        #stats-container { display: flex; justify-content: space-around; padding: 15px 5px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+        .stat-box { width: 22%; display: flex; flex-direction: column; align-items: center; }
+        .stat-label { font-size: 11px; color: #aaa; margin-top: 3px; font-weight: 600; }
+        .stat-bar-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 5px; border: 1px solid #444; }
+        .stat-bar-fill { height: 100%; width: 50%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .stat-number { font-size: 13px; font-weight: 900; margin-top: 2px; }
 
-        .stat-bar-fill {
-            height: 100%; width: 50%;
-            transition: width 0.4s ease, background-color 0.3s;
-        }
+        #turn-counter { text-align: center; padding: 10px; font-size: 0.8rem; color: #888; letter-spacing: 2px; }
 
-        .stat-label { font-size: 0.7rem; color: #aaa; font-weight: 600; }
-
-        /* 턴 카운터 */
-        #turn-counter {
-            text-align: center; font-size: 0.8rem; color: #666; margin-top: 10px;
-        }
-
-        /* 게임 영역 */
-        #game-area {
-            flex: 1; display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            position: relative; perspective: 1000px;
-        }
-
+        #game-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; perspective: 1000px; padding: 20px; }
+        
         #card {
-            width: 300px; height: 460px;
-            background: var(--card-bg); color: var(--card-text);
-            border-radius: 15px; position: absolute;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; overflow: hidden;
-            transform-origin: 50% 100%; cursor: grab; z-index: 10;
+            width: 100%; max-width: 340px; height: 520px; background: var(--card-bg); color: var(--card-text);
+            border-radius: 20px; position: absolute; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; overflow: hidden; z-index: 10;
+            transition: transform 0.1s; cursor: grab;
+            animation: cardAppear 0.5s ease-out;
         }
+        @keyframes cardAppear { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .card-image-wrapper {
-            width: 100%; height: 55%; background: #ddd;
-            position: relative; overflow: hidden;
-        }
-
-        .card-image { width: 100%; height: 100%; object-fit: cover; }
-
-        .card-overlay {
-            position: absolute; top: 30px;
-            font-size: 2rem; font-weight: 800; padding: 5px 10px;
-            border: 4px solid; border-radius: 8px; opacity: 0; z-index: 20;
-        }
-        .overlay-left { right: 20px; color: #E91E63; border-color: #E91E63; transform: rotate(15deg); } /* 거절/Left */
-        .overlay-right { left: 20px; color: #4CAF50; border-color: #4CAF50; transform: rotate(-15deg); } /* 승인/Right */
-
-        .card-content {
-            padding: 20px; text-align: center; flex: 1;
-            display: flex; flex-direction: column; justify-content: center;
-        }
-
-        .character-name {
-            font-size: 0.9rem; font-weight: 700; color: #666;
-            margin-bottom: 8px; letter-spacing: 1px;
-        }
-
-        .question-text {
-            font-size: 1.1rem; line-height: 1.45; font-weight: 700; word-break: keep-all;
-        }
-
-        /* 하단 버튼 */
-        #controls { padding: 25px; display: flex; justify-content: center; gap: 15px; }
-        .control-btn {
-            background: transparent; border: 1px solid #666; color: #ddd;
-            padding: 12px 20px; border-radius: 25px; font-size: 0.9rem;
-            cursor: pointer; transition: 0.2s;
-        }
-        .control-btn:active { background: #444; }
-
-        /* 엔딩 오버레이 */
-        #game-over {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 100;
-            opacity: 0; pointer-events: none; transition: opacity 0.5s; padding: 20px; text-align: center;
-        }
-        #game-over.active { opacity: 1; pointer-events: all; }
+        .card-image-wrapper { width: 100%; height: 50%; background: #f0f2f5; display: flex; justify-content: center; align-items: center; border-bottom: 1px solid #ddd; position: relative; }
+        .card-icon { font-size: 8rem; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); transition: transform 0.3s; }
         
-        #game-over h1 { font-size: 2rem; margin-bottom: 10px; color: #fff; }
-        #ending-type { font-size: 1.5rem; font-weight: bold; color: var(--accent-ethic); margin-bottom: 15px; }
-        #game-over-msg { font-size: 1rem; color: #ccc; margin-bottom: 30px; line-height: 1.6; max-width: 400px; }
-        
-        #restart-btn {
-            background: #fff; color: #000; border: none; padding: 12px 30px;
-            font-size: 1.1rem; border-radius: 30px; cursor: pointer; font-weight: bold;
+        .card-content { padding: 25px; text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .character-name { font-size: 0.9rem; color: #888; font-weight: 800; margin-bottom: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .question-text { font-size: 1.2rem; line-height: 1.5; font-weight: 700; color: #222; word-break: keep-all; }
+
+        .card-overlay { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2rem; font-weight: 900; padding: 10px 20px; border: 5px solid; border-radius: 15px; opacity: 0; z-index: 20; pointer-events: none; }
+        .overlay-left { right: 20px; color: #ff4444; border-color: #ff4444; transform: rotate(15deg) translateY(-50%); }
+        .overlay-right { left: 20px; color: #4CAF50; border-color: #4CAF50; transform: rotate(-15deg) translateY(-50%); }
+
+        #history-panel {
+            position: absolute; right: 10px; top: 120px; width: 85px; bottom: 20px;
+            background: rgba(0,0,0,0.2); border-radius: 10px; padding: 10px;
+            overflow-y: hidden; display: flex; flex-direction: column; gap: 8px;
+            pointer-events: none; z-index: 5;
         }
+        .history-item { 
+            width: 100%; height: 35px; border-radius: 5px; display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold; color: white; animation: slideIn 0.3s ease-out; text-align: center;
+        }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; padding: 20px; text-align: center; backdrop-filter: blur(10px); }
+        .modal.active { display: flex; }
+        
+        button { padding: 15px 30px; border-radius: 30px; border: none; font-weight: 800; cursor: pointer; font-size: 1rem; margin-top: 15px; transition: 0.2s; }
+        .primary-btn { background: var(--accent-main); color: #000; }
+        .close-btn { background: #333; color: white; padding: 10px 20px; font-size: 0.9rem; }
+
+        .scroll-area { width: 100%; max-width: 450px; max-height: 60vh; overflow-y: auto; margin: 20px 0; padding-right: 5px; }
+        .achievement-item { background: rgba(255,255,255,0.08); padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; text-align: left; }
+        .ach-icon { font-size: 1.5rem; width: 40px; text-align: center; }
+        .ach-text h4 { color: gold; margin-bottom: 4px; font-size: 0.95rem; }
+        .ach-text p { font-size: 0.8rem; color: #aaa; margin: 0; }
+        .locked { opacity: 0.3; filter: grayscale(100%); }
+
+        #battle-area { width: 200px; height: 200px; background: radial-gradient(circle, #ffdd57 0%, #f39c12 100%); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; margin: 20px 0; border: 6px solid #fff; box-shadow: 0 0 30px rgba(255,221,87,0.5); transform: scale(1); transition: transform 0.05s; }
+        .battle-count { font-size: 3.5rem; font-weight: 900; color: #fff; }
+        .timer-bar { width: 100%; max-width: 300px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; margin-top: 15px; }
+        .timer-fill { height: 100%; background: #ff4444; width: 100%; }
+
+        .quiz-option { width: 100%; max-width: 400px; background: rgba(255,255,255,0.1); color: white; border: 1px solid #555; padding: 15px; margin-bottom: 10px; border-radius: 10px; text-align: left; cursor: pointer; }
     </style>
 </head>
 <body>
 
-   <div id="stats-container">
-    <div class="stat-box">
-        <i class="fa-solid fa-users stat-icon" style="color:var(--accent-trust)"></i>
-        <div class="stat-bar-bg">
-            <div id="bar-trust" class="stat-bar-fill" style="background:var(--accent-trust)"></div>
-            <span id="val-trust" class="stat-value">50</span>
+    <div id="header">
+        <div style="font-weight: 900; color: var(--accent-main); letter-spacing: 1px;">ETHICAL GOVERNOR</div>
+        <div style="cursor:pointer;" onclick="showAchievements()">
+            <i class="fa-solid fa-trophy" style="color: gold; font-size: 1.4rem;"></i>
         </div>
-        <div class="stat-label">시민신뢰</div>
     </div>
-    <div class="stat-box">
-        <i class="fa-solid fa-scale-balanced stat-icon" style="color:var(--accent-ethic)"></i>
-        <div class="stat-bar-bg">
-            <div id="bar-ethic" class="stat-bar-fill" style="background:var(--accent-ethic)"></div>
-            <span id="val-ethic" class="stat-value">50</span>
-        </div>
-        <div class="stat-label">윤리정당</div>
-    </div>
-    <div class="stat-box">
-        <i class="fa-solid fa-earth-americas stat-icon" style="color:var(--accent-intl)"></i>
-        <div class="stat-bar-bg">
-            <div id="bar-intl" class="stat-bar-fill" style="background:var(--accent-intl)"></div>
-            <span id="val-intl" class="stat-value">50</span>
-        </div>
-        <div class="stat-label">국제관계</div>
-    </div>
-    <div class="stat-box">
-        <i class="fa-solid fa-shield-halved stat-icon" style="color:var(--accent-stable)"></i>
-        <div class="stat-bar-bg">
-            <div id="bar-stable" class="stat-bar-fill" style="background:var(--accent-stable)"></div>
-            <span id="val-stable" class="stat-value">50</span>
-        </div>
-        <div class="stat-label">국가안정</div>
-    </div>
-</div>
-<style>
-    /* 게이지 숫자 스타일 추가 */
-    .stat-bar-bg {
-        position: relative; /* 숫자를 바 위에 띄우기 위해 필요 */
-        width: 100%; height: 14px; /* 숫자가 보이도록 높이 약간 조절 */
-        background: #444;
-        border-radius: 7px; overflow: hidden; margin-bottom: 4px;
-    }
 
-  .stat-value {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10; /* 바보다 위에 오도록 */
-    font-size: 11px;
-    font-weight: bold;
-    color: white;
-    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-    pointer-events: none;
-}
-    }
-    
-    .stat-bar-fill {
-        height: 100%; width: 50%;
-        transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-</style>
+    <div id="stats-container">
+        <div class="stat-box">
+            <i class="fa-solid fa-users" style="color:var(--accent-trust)"></i>
+            <div class="stat-label">신뢰</div>
+            <div class="stat-bar-bg"><div id="bar-trust" class="stat-bar-fill" style="background:var(--accent-trust)"></div></div>
+            <div id="num-trust" class="stat-number">50</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-scale-balanced" style="color:var(--accent-ethic)"></i>
+            <div class="stat-label">윤리</div>
+            <div class="stat-bar-bg"><div id="bar-ethic" class="stat-bar-fill" style="background:var(--accent-ethic)"></div></div>
+            <div id="num-ethic" class="stat-number">50</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-earth-asia" style="color:var(--accent-intl)"></i>
+            <div class="stat-label">국제</div>
+            <div class="stat-bar-bg"><div id="bar-intl" class="stat-bar-fill" style="background:var(--accent-intl)"></div></div>
+            <div id="num-intl" class="stat-number">50</div>
+        </div>
+        <div class="stat-box">
+            <i class="fa-solid fa-shield-halved" style="color:var(--accent-stable)"></i>
+            <div class="stat-label">안정</div>
+            <div class="stat-bar-bg"><div id="bar-stable" class="stat-bar-fill" style="background:var(--accent-stable)"></div></div>
+            <div id="num-stable" class="stat-number">50</div>
+        </div>
+    </div>
 
-<script>
-    // 자바스크립트 업데이트 함수 수정
-    function updateStatsUI() {
-        for (const [key, value] of Object.entries(stats)) {
-            // 바 길이 업데이트
-            bars[key].style.width = value + '%';
-            
-            // 숫자 텍스트 업데이트 (추가된 부분)
-            const valEl = document.getElementById('val-' + key);
-            if (valEl) valEl.textContent = value;
-
-            // 위험 수치 표시 (20 이하 또는 80 이상)
-            if(value <= 20 || value >= 80) {
-                bars[key].parentElement.style.boxShadow = "0 0 5px red";
-            } else {
-                bars[key].parentElement.style.boxShadow = "none";
-            }
-        }
-    }
-</script>
-    <div id="turn-counter">임기: 1 / 20</div>
+    <div id="turn-counter">DAY 1 - GOVERNANCE</div>
 
     <div id="game-area">
+        <div id="history-panel"></div>
         <div id="card">
-            <div class="card-overlay overlay-right" id="overlay-yes">YES</div>
-            <div class="card-overlay overlay-left" id="overlay-no">NO</div>
-            
+            <div class="card-overlay overlay-right" id="overlay-right">YES</div>
+            <div class="card-overlay overlay-left" id="overlay-left">NO</div>
             <div class="card-image-wrapper">
-                <img src="" alt="Character" id="char-img" class="card-image">
+                <i id="char-icon" class="card-icon fa-solid fa-robot"></i>
             </div>
             <div class="card-content">
-                <div id="char-name" class="character-name">캐릭터</div>
-                <div id="question" class="question-text">질문</div>
+                <div id="char-name" class="character-name">CHARACTER</div>
+                <div id="question" class="question-text">...</div>
             </div>
         </div>
     </div>
 
-    <div id="controls">
-        <button class="control-btn" id="btn-left">◀ 선택 A</button>
-        <button class="control-btn" id="btn-right">선택 B ▶</button>
+    <div id="achievement-modal" class="modal">
+        <h2 style="color:gold; margin-bottom:10px;"><i class="fa-solid fa-medal"></i> 나의 업적</h2>
+        <div class="scroll-area" id="ach-list"></div>
+        <button class="close-btn" onclick="document.getElementById('achievement-modal').classList.remove('active')">닫기</button>
     </div>
 
-    <div id="game-over">
-        <h1 id="end-title">GAME OVER</h1>
-        <div id="ending-type"></div>
-        <p id="game-over-msg">결과 메시지</p>
-        <button id="restart-btn" onclick="initGame()">다시 통치하기</button>
+    <div id="quiz-modal" class="modal">
+        <h1 style="color:#4CAF50; margin-bottom:20px;">💡 철학자 퀴즈</h1>
+        <p id="quiz-question" style="font-size:1.2rem; margin-bottom:30px; max-width:500px; font-weight: bold; line-height: 1.4; color: white;"></p>
+        <div id="quiz-options" style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:400px;"></div>
+    </div>
+
+    <div id="battle-modal" class="modal">
+        <h1 style="color:var(--accent-main);">MOUSE CLICK BATTLE!</h1>
+        <div id="battle-area" onclick="handleBattleClick()">
+            <span style="font-size: 0.9rem; color: #fff; font-weight: bold;">TAP!</span>
+            <div class="battle-count" id="battle-click-count">0</div>
+        </div>
+        <div class="timer-bar"><div id="timer-bar-fill" class="timer-fill"></div></div>
+        <div id="battle-timer-text" style="margin-top: 10px; font-weight: bold; color: #ff4444; font-size: 1.5rem;">15.0s</div>
+    </div>
+
+    <div id="event-modal" class="modal">
+        <h1 style="color:gold;">STAT CONTROL</h1>
+        <p id="reward-info" style="font-size:1.1rem; margin-bottom:20px; color:var(--accent-main);"></p>
+        <div id="stat-control-container" style="width: 100%; max-width: 400px;"></div>
+        <button class="primary-btn" onclick="applyEventChanges()">반영하기</button>
     </div>
 
 <script>
-    // --- [기획안 기반] 시나리오 데이터 (20개) ---
-    // image: 로컬 이미지가 있다면 "images/파일명.png"로 변경하세요.
-    // 지금은 테스트를 위해 온라인 랜덤 이미지를 배정했습니다.
+    let stats = { trust: 50, ethic: 50, intl: 50, stable: 50 };
+    let turnCount = 1;
+    let currentCardData = null;
+    let battleClicks = 0, battleActive = false, battleTimeLeft = 15, statAdjustmentPoints = 0, tempStats = {};
+    let unlockedAchievements = [];
+
+    // --- 모든 시나리오 유지 ---
     const scenarios = [
-        // 1. 보안 vs 자유
-        {
-            character: "보안 사령관",
-            image: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?auto=format&fit=crop&w=400&q=80",
-            question: "범죄율이 급증하고 있습니다. AI 감시 시스템을 전면 도입하여 도시를 24시간 감시할까요?",
-            leftChoice: { label: "거부 (자유)", effects: { trust: 10, stable: -10, ethic: 10, intl: 0 } },
-            rightChoice: { label: "도입 (안전)", effects: { trust: -15, stable: 20, ethic: -15, intl: 0 } }
-        },
-        // 2. 난민 (국제 vs 국익)
-        {
-            character: "외교 사절",
-            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
-            question: "기후 재난으로 인접국 난민이 국경에 몰렸습니다. 전면 수용하시겠습니까?",
-            leftChoice: { label: "제한 수용", effects: { trust: 5, stable: 10, ethic: -5, intl: -15 } },
-            rightChoice: { label: "전면 수용", effects: { trust: -10, stable: -20, ethic: 15, intl: 20 } }
-        },
-        // 3. 역사 정의 (정의 vs 법치)
-        {
-            character: "법무부 장관",
-            image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80",
-            question: "과거 독재 시절 부정 축재한 가문의 재산을 지금 환수하라는 여론이 거셉니다. 법적 시효가 지났습니다.",
-            leftChoice: { label: "법치 (불허)", effects: { trust: -15, stable: 10, ethic: -5, intl: 0 } },
-            rightChoice: { label: "정의 (환수)", effects: { trust: 15, stable: -10, ethic: 10, intl: 0 } }
-        },
-        // 4. 유전자 편집 (기술 vs 윤리)
-        {
-            character: "과학 기술자",
-            image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=400&q=80",
-            question: "질병 면역력을 갖춘 '유전자 편집 아기' 시술 허용을 요청합니다. 부유층의 요구가 거셉니다.",
-            leftChoice: { label: "금지 (윤리)", effects: { trust: 5, stable: -5, ethic: 20, intl: 0 } },
-            rightChoice: { label: "허용 (경쟁)", effects: { trust: -10, stable: 15, ethic: -20, intl: 5 } }
-        },
-        // 5. 혐오 표현 (표현의 자유 vs 약자 보호)
-        {
-            character: "인권 변호사",
-            image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=400&q=80",
-            question: "온라인 혐오 표현을 강력 처벌하는 법안입니다. 표현의 자유 침해 우려가 있습니다.",
-            leftChoice: { label: "자율 규제", effects: { trust: -10, stable: 0, ethic: 5, intl: 0 } },
-            rightChoice: { label: "법안 통과", effects: { trust: 15, stable: 5, ethic: -10, intl: 0 } }
-        },
-        // 6. 환경 (현재 vs 미래)
-        {
-            character: "환경 운동가",
-            image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
-            question: "탄소 감축 목표를 위해 주요 공장 가동을 강제로 중단해야 합니다. 경제 타격이 예상됩니다.",
-            leftChoice: { label: "경제 유지", effects: { trust: 5, stable: 10, ethic: -10, intl: -15 } },
-            rightChoice: { label: "강제 중단", effects: { trust: -15, stable: -15, ethic: 15, intl: 15 } }
-        },
-        // 7. AI 판사 (인간성 vs 효율성)
-        {
-            character: "철학자 관료",
-            image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-            question: "AI 판사는 감정 없이 24시간 공정하게 재판합니다. 사법부에 전면 도입할까요?",
-            leftChoice: { label: "인간 판사", effects: { trust: -5, stable: -5, ethic: 10, intl: 0 } },
-            rightChoice: { label: "AI 도입", effects: { trust: 5, stable: 15, ethic: -15, intl: 5 } }
-        },
-        // 8. 노키즈존 (차별 vs 영업자유)
-        {
-            character: "시민 대표",
-            image: "https://images.unsplash.com/photo-1554151228-14d9def656ec?auto=format&fit=crop&w=400&q=80",
-            question: "상점 주인이 '노 키즈 존(아동 출입 금지)'을 설정할 권리를 법적으로 보장해달라고 합니다.",
-            leftChoice: { label: "금지 (차별)", effects: { trust: 5, stable: 0, ethic: 10, intl: 0 } },
-            rightChoice: { label: "허용 (자유)", effects: { trust: 5, stable: 5, ethic: -10, intl: 0 } }
-        },
-        // 9. 테러 협상 (원칙 vs 생명)
-        {
-            character: "보안 사령관",
-            image: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?auto=format&fit=crop&w=400&q=80",
-            question: "테러 단체가 국민을 납치했습니다. 몸값을 주면 풀려나지만, 그 돈은 무기 구입에 쓰입니다.",
-            leftChoice: { label: "협상 거부", effects: { trust: -20, stable: 10, ethic: -5, intl: 5 } },
-            rightChoice: { label: "몸값 지불", effects: { trust: 20, stable: -15, ethic: 5, intl: -5 } }
-        },
-        // 10. 기본소득 (복지 vs 재정)
-        {
-            character: "경제 고문",
-            image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",
-            question: "모든 국민에게 조건 없이 매달 현금을 지급하는 '기본소득'을 도입하시겠습니까?",
-            leftChoice: { label: "반대 (재정)", effects: { trust: -10, stable: 15, ethic: 0, intl: 5 } },
-            rightChoice: { label: "찬성 (복지)", effects: { trust: 20, stable: -20, ethic: 5, intl: -5 } }
-        },
-        // 11. 트롤리 딜레마 (자율주행)
-        {
-            character: "기술 개발자",
-            image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=400&q=80",
-            question: "자율주행차가 사고 직전입니다. 탑승자를 보호할까요, 더 많은 보행자를 보호할까요?",
-            leftChoice: { label: "탑승자 우선", effects: { trust: 5, stable: 5, ethic: -20, intl: 0 } },
-            rightChoice: { label: "보행자 우선", effects: { trust: -10, stable: -5, ethic: 20, intl: 0 } }
-        },
-        // 12. 동물 실험 (생명 vs 발전)
-        {
-            character: "제약 회사 대표",
-            image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",
-            question: "난치병 치료제 개발을 위해 대규모 동물 실험이 필수적입니다. 허가하시겠습니까?",
-            leftChoice: { label: "금지 (생명)", effects: { trust: 5, stable: -10, ethic: 15, intl: 0 } },
-            rightChoice: { label: "허용 (발전)", effects: { trust: 0, stable: 15, ethic: -15, intl: 5 } }
-        },
-        // 13. 알 권리 vs 프라이버시
-        {
-            character: "질병관리청장",
-            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
-            question: "전염병 확산을 막기 위해 확진자의 모든 동선을 공개해야 합니다. 사생활 침해가 우려됩니다.",
-            leftChoice: { label: "비공개", effects: { trust: 10, stable: -10, ethic: 10, intl: 0 } },
-            rightChoice: { label: "전체 공개", effects: { trust: -10, stable: 15, ethic: -10, intl: 0 } }
-        },
-        // 14. 문화재 반환
-        {
-            character: "문화부 장관",
-            image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=400&q=80",
-            question: "과거 제국주의 시절 우리가 약탈해온 유물을 돌려달라는 요구가 왔습니다.",
-            leftChoice: { label: "반환 거부", effects: { trust: 10, stable: 5, ethic: -10, intl: -15 } },
-            rightChoice: { label: "유물 반환", effects: { trust: -15, stable: -5, ethic: 15, intl: 20 } }
-        },
-        // 15. 안락사
-        {
-            character: "의사 협회장",
-            image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=400&q=80",
-            question: "고통받는 말기 환자가 존엄하게 죽을 권리(안락사)를 합법화해달라고 합니다.",
-            leftChoice: { label: "불허 (생명)", effects: { trust: -5, stable: 0, ethic: 10, intl: 0 } },
-            rightChoice: { label: "허용 (존엄)", effects: { trust: 10, stable: 0, ethic: -10, intl: 5 } }
-        }
+        { c: "AI 보안국", q: "범죄 예측 시스템을 도입하여 잠재적 범죄자를 미리 체포할까요?", img: "fa-robot", color: "#607d8b", l: "거절", le: {ethic:10, stable:-5}, r: "도입", re: {ethic:-20, stable:25} },
+        { c: "재무부 장관", q: "국가 부채가 심각합니다. 노인 연금을 50% 삭감해야 합니다.", img: "fa-money-bill-trend-up", color: "#4caf50", l: "유지", le: {trust:10, stable:-15}, r: "삭감", re: {trust:-25, stable:15} },
+        { c: "시위대 리더", q: "광장에 시민들이 모였습니다. 우리 요구를 들어주지 않으면 폭동이 일어납니다.", img: "fa-bullhorn", color: "#ff5722", l: "진압", le: {ethic:-20, stable:20}, r: "수용", re: {stable:-20, trust:15} },
+        { c: "환경 보호가", q: "희귀 동물이 서식하는 숲을 밀고 거대한 공단을 조성할까요?", img: "fa-tree", color: "#8bc34a", l: "보존", le: {ethic:15, stable:-10}, r: "개발", re: {ethic:-20, stable:15, intl:-5} },
+        { c: "거대 IT 기업", q: "전 국민에게 무료 스마트폰을 제공하겠습니다. 개인정보를 저희가 갖습니다.", img: "fa-mobile-screen", color: "#2196f3", l: "거절", le: {trust:-5}, r: "계약", re: {trust:10, ethic:-15, intl:5} },
+        { c: "외교관", q: "이웃 독재 국가와 무역 협정을 맺으면 경제가 살아납니다.", img: "fa-handshake", color: "#3f51b5", l: "거절", le: {intl:-10, ethic:10}, r: "협정", re: {intl:20, ethic:-10} },
+        { c: "언론사 국장", q: "정부에 불리한 뉴스가 나오고 있습니다. 보도를 통제할까요?", img: "fa-newspaper", color: "#9e9e9e", l: "자유 보장", le: {trust:5, stable:-10}, r: "보도 통제", re: {trust:-15, stable:15, ethic:-10} },
+        { c: "교육부 장관", q: "엘리트 양성을 위해 입시 위주 교육을 강화해야 합니다.", img: "fa-graduation-cap", color: "#E91E63", l: "평등 교육", le: {intl:-5, trust:5}, r: "엘리트 교육", re: {intl:10, trust:-10} },
+        { c: "의료 협회", q: "의료 민영화는 의료 서비스의 질을 높일 것입니다.", img: "fa-user-doctor", color: "#00BCD4", l: "공공 유지", le: {trust:10, stable:-5}, r: "민영화", re: {trust:-20, stable:10, intl:5} },
+        { c: "비밀 경찰", q: "반체제 인사를 암살하여 후환을 없애겠습니다.", img: "fa-user-secret", color: "#333", l: "체포만", le: {stable:-5}, r: "암살 승인", re: {stable:20, ethic:-30, trust:-10} },
+        { c: "노동 조합", q: "주 4일 근무제를 도입하여 시민들의 행복도를 높여야 합니다.", img: "fa-briefcase", color: "#fb8c00", l: "거절", le: {stable:10}, r: "도입", re: {trust:20, stable:-15} },
+        { c: "국방부 장관", q: "핵무기 개발을 시작하여 국제적 위상을 높입시다.", img: "fa-bomb", color: "#d32f2f", l: "포기", le: {intl:5, stable:5}, r: "개발", re: {intl:-30, stable:20, trust:-10} },
+        { c: "가상화폐 협회", q: "비트코인을 국가 법정 통화로 승인해주십시오.", img: "fa-coins", color: "#fbc02d", l: "거절", le: {stable:5}, r: "승인", re: {stable:-25, intl:15, trust:10} },
+        { c: "식량 농업국", q: "식량 부족 해결을 위해 식용 곤충 급식을 의무화할까요?", img: "fa-bug", color: "#795548", l: "반대", le: {trust:5}, r: "찬성", re: {trust:-20, stable:15, ethic:5} },
+        { c: "과학 기술처", q: "인간 복제 연구를 허용하면 불로장생의 시대가 열립니다.", img: "fa-dna", color: "#9c27b0", l: "금지", le: {ethic:20}, r: "허용", re: {ethic:-40, intl:10, stable:10} },
+        { c: "동물 보호 단체", q: "모든 동물 실험을 법적으로 전면 금지해야 합니다.", img: "fa-paw", color: "#4caf50", l: "허용", le: {ethic:-10, stable:5}, r: "금지", re: {ethic:20, stable:-10} },
+        { c: "우주 항공국", q: "화성 기지 건설 프로젝트를 시작할까요?", img: "fa-rocket", color: "#1a237e", l: "취소", le: {trust:10}, r: "추진", re: {intl:25, trust:-15} },
+        { c: "사법 위원회", q: "사형 제도를 다시 부활시킵시다.", img: "fa-gavel", color: "#212121", l: "반대", le: {ethic:10, intl:5}, r: "부활", re: {stable:20, ethic:-20, intl:-15} },
+        { c: "이민자 연합", q: "국경을 전면 개방하고 이민을 수용합시다.", img: "fa-passport", color: "#ec407a", l: "폐쇄", le: {stable:10}, r: "개방", re: {intl:15, stable:-20, trust:-10} },
+        { c: "문화 관광부", q: "도박 산업을 합법화하여 수익을 극대화할까요?", img: "fa-dice", color: "#673ab7", l: "금지", le: {ethic:10}, r: "허용", re: {stable:-10, trust:-10, intl:10} },
+        { c: "국방 정보국", q: "전국에 감시 카메라를 설치하여 범죄를 0%로 만들까요?", img: "fa-eye", color: "#37474f", l: "자유 보호", le: {ethic:15, stable:-10}, r: "감시 강화", re: {ethic:-25, stable:25} },
+        { c: "교육 위원회", q: "역사 교과서를 정부 입맛에 맞게 수정할까요?", img: "fa-book", color: "#795548", l: "객관성 유지", le: {trust:10, stable:-5}, r: "역사 수정", re: {trust:-20, stable:15, ethic:-15} }
     ];
 
-    // --- 게임 상태 ---
-    let stats = { trust: 50, ethic: 50, intl: 50, stable: 50 };
-    let currentCardIndex = 0;
-    let deck = [];
-    let turnCount = 0;
-    const MAX_TURNS = 20; // 임기 20턴
+    const quizData = [
+        { q: "'나는 생각한다, 고로 존재한다'는 누구의 말인가요?", a: ["데카르트", "칸트", "니체", "스피노자"], correct: 0 },
+        { q: "플라톤의 '이상 국가'에서 통치자 계급은?", a: ["군인", "철학자", "상인", "노동자"], correct: 1 },
+        { q: "'신은 죽었다'고 선언하며 기존 가치를 부정한 철학자는?", a: ["니체", "사르트르", "헤겔", "쇼펜하우어"], correct: 0 }
+    ];
 
-    // --- DOM 요소 ---
-    const cardEl = document.getElementById('card');
-    const charImgEl = document.getElementById('char-img');
-    const charNameEl = document.getElementById('char-name');
-    const questionEl = document.getElementById('question');
-    const overlayYes = document.getElementById('overlay-yes');
-    const overlayNo = document.getElementById('overlay-no');
-    const turnEl = document.getElementById('turn-counter');
-    
-    const bars = {
-        trust: document.getElementById('bar-trust'),
-        ethic: document.getElementById('bar-ethic'),
-        intl: document.getElementById('bar-intl'),
-        stable: document.getElementById('bar-stable')
-    };
+    // --- 모든 도전과제 데이터 유지 ---
+    const achievementData = [
+        { id: 'start', name: "첫 걸음", desc: "통치를 시작했습니다.", cond: () => turnCount >= 2, icon: "fa-flag" },
+        { id: 'week', name: "일주일의 고비", desc: "7일 동안 생존했습니다.", cond: () => turnCount >= 7, icon: "fa-calendar-week" },
+        { id: 'survive', name: "노련한 정치가", desc: "15일 동안 생존했습니다.", cond: () => turnCount >= 15, icon: "fa-medal" },
+        { id: 'god', name: "전설의 통치자", desc: "30일 동안 생존했습니다.", cond: () => turnCount >= 30, icon: "fa-crown" },
+        { id: 'rich', name: "부국강병", desc: "국제 수치를 80 이상 달성", cond: () => stats.intl >= 80, icon: "fa-money-bill-trend-up" },
+        { id: 'angel', name: "성인군자", desc: "윤리 수치를 80 이상 달성", cond: () => stats.ethic >= 80, icon: "fa-dove" }
+    ];
 
-    function initGame() {
-        stats = { trust: 50, ethic: 50, intl: 50, stable: 50 };
-        turnCount = 1;
-        updateStatsUI();
-        deck = [...scenarios].sort(() => Math.random() - 0.5); // 덱 셔플
-        currentCardIndex = 0;
-        loadCard();
-        document.getElementById('game-over').classList.remove('active');
+    function updateUI() {
+        for (let key in stats) {
+            document.getElementById(`bar-${key}`).style.width = stats[key] + '%';
+            document.getElementById(`num-${key}`).textContent = stats[key];
+        }
+        document.getElementById('turn-counter').textContent = `DAY ${turnCount} - GOVERNANCE`;
+        checkAchievements();
+    }
+
+    function addHistory(text, color) {
+        const panel = document.getElementById('history-panel');
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.style.backgroundColor = color;
+        item.textContent = text;
+        panel.prepend(item);
+        if(panel.children.length > 8) panel.removeChild(panel.lastChild);
+    }
+
+    function checkGameOver() {
+        const statNames = {trust: '신뢰', ethic: '윤리', intl: '국제', stable: '안정'};
+        for (let k in stats) {
+            if (stats[k] <= 0 || stats[k] >= 100) {
+                const state = stats[k] <= 0 ? "바닥났습니다" : "폭주했습니다";
+                setTimeout(() => {
+                    alert(`[게임 종료: ${statNames[k]} ${state}]\n당신은 ${turnCount}일 동안 통치하고 물러납니다.`);
+                    location.reload();
+                }, 100);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function checkAchievements() {
+        achievementData.forEach(ach => {
+            if (!unlockedAchievements.includes(ach.id) && ach.cond()) {
+                unlockedAchievements.push(ach.id);
+                // 여기에 알림 로직을 추가할 수 있습니다.
+            }
+        });
     }
 
     function loadCard() {
-        // 임기 종료 체크
-        if (turnCount > MAX_TURNS) {
-            analyzeEnding();
-            return;
-        }
-
-        // 덱이 떨어지면 다시 셔플
-        if (currentCardIndex >= deck.length) {
-            deck = [...scenarios].sort(() => Math.random() - 0.5);
-            currentCardIndex = 0;
-        }
-
-        const cardData = deck[currentCardIndex];
-        
-        // 이미지 및 텍스트 설정
-        charImgEl.src = cardData.image;
-        charNameEl.textContent = cardData.character;
-        questionEl.textContent = cardData.question;
-        
-        overlayNo.textContent = cardData.leftChoice.label;
-        overlayYes.textContent = cardData.rightChoice.label;
-        
-        document.getElementById('btn-left').textContent = "◀ " + cardData.leftChoice.label;
-        document.getElementById('btn-right').textContent = cardData.rightChoice.label + " ▶";
-        
-        turnEl.textContent = `임기: ${turnCount} / ${MAX_TURNS}`;
-
-        // 카드 위치 초기화
-        cardEl.style.transition = 'none';
-        cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
-        overlayYes.style.opacity = 0;
-        overlayNo.style.opacity = 0;
+        if (turnCount > 1 && turnCount % 5 === 0) { showQuiz(); return; }
+        currentCardData = scenarios[Math.floor(Math.random() * scenarios.length)];
+        const card = document.getElementById('card');
+        card.style.animation = 'none'; card.offsetHeight; card.style.animation = 'cardAppear 0.5s ease-out';
+        const iconEl = document.getElementById('char-icon');
+        iconEl.className = `card-icon fa-solid ${currentCardData.img}`;
+        iconEl.style.color = currentCardData.color;
+        document.getElementById('char-name').textContent = currentCardData.c;
+        document.getElementById('question').textContent = currentCardData.q;
+        document.getElementById('overlay-left').textContent = currentCardData.l;
+        document.getElementById('overlay-right').textContent = currentCardData.r;
+        card.style.transform = `translate(0,0) rotate(0)`; card.style.opacity = 1;
+        document.getElementById('overlay-left').style.opacity = 0;
+        document.getElementById('overlay-right').style.opacity = 0;
     }
 
-    function updateStatsUI() {
-    for (const [key, value] of Object.entries(stats)) {
-        // 1. 게이지 바(그래프) 길이 업데이트
-        const barEl = document.getElementById('bar-' + key);
-        if (barEl) {
-            barEl.style.width = value + '%';
-        }
-        
-        // 2. 중요: 숫자 텍스트를 현재 데이터(value)로 업데이트
-        const valEl = document.getElementById('val-' + key);
-        if (valEl) {
-            valEl.textContent = Math.round(value); // 소수점을 반올림하여 정수로 표시
-        }
+    function applyChoice(dir) {
+        const effects = dir === 'right' ? currentCardData.re : currentCardData.le;
+        const choiceText = dir === 'right' ? currentCardData.r : currentCardData.l;
+        addHistory(choiceText, dir === 'right' ? '#4CAF50' : '#ff4444');
 
-        // 3. (선택) 수치가 위험할 때 시각적 피드백
-        if (value <= 20 || value >= 80) {
-            if (valEl) valEl.style.color = "#ff4444"; // 위험 수치일 때 숫자 빨간색
-        } else {
-            if (valEl) valEl.style.color = "white";   // 정상일 때 흰색
+        for (let k in effects) {
+            stats[k] = Math.min(100, Math.max(0, stats[k] + effects[k]));
         }
-    }
-}
+        updateUI();
 
-    function handleChoice(direction) {
-        const cardData = deck[currentCardIndex];
-        const effects = direction === 'right' ? cardData.rightChoice.effects : cardData.leftChoice.effects;
+        if (checkGameOver()) return;
 
-        // 능력치 적용
-        for (const key in effects) {
-            stats[key] += effects[key];
-            if (stats[key] > 100) stats[key] = 100;
-            if (stats[key] < 0) stats[key] = 0;
-        }
-        updateStatsUI();
-
-        // 사망 체크
-        const deathReason = checkDeath();
-        if (deathReason) {
-            showGameOver("축출되었습니다", deathReason, "실패");
-        } else {
-            // 생존 시 다음 턴
-            animateCardExit(direction, () => {
-                turnCount++;
-                currentCardIndex++;
-                loadCard();
-            });
-        }
+        turnCount++;
+        const card = document.getElementById('card');
+        card.style.transition = '0.4s ease-in';
+        card.style.transform = `translate(${dir === 'right' ? 500 : -500}px, 100px) rotate(${dir === 'right' ? 45 : -45}deg)`;
+        card.style.opacity = 0;
+        setTimeout(loadCard, 400);
     }
 
-    // 중간에 게임오버(사망)하는 조건
-    function checkDeath() {
-        if (stats.trust <= 0) return "시민들이 폭동을 일으켜 청와대를 점거했습니다.";
-        if (stats.trust >= 100) return "지나친 포퓰리즘으로 국가 기능이 마비되었습니다.";
-        if (stats.ethic <= 0) return "정부의 도덕적 타락으로 탄핵당했습니다.";
-        if (stats.intl <= 0) return "국제 사회의 제재로 경제가 붕괴했습니다.";
-        if (stats.stable <= 0) return "무정부 상태가 되어 쿠데타가 발생했습니다.";
-        return null;
+    function showQuiz() {
+        const quiz = quizData[Math.floor(Math.random() * quizData.length)];
+        document.getElementById('quiz-question').textContent = quiz.q;
+        const optionsDiv = document.getElementById('quiz-options');
+        optionsDiv.innerHTML = '';
+        quiz.a.forEach((ans, idx) => {
+            const btn = document.createElement('button');
+            btn.className = "quiz-option"; btn.textContent = ans;
+            btn.onclick = () => {
+                if (idx === quiz.correct) startClickBattle();
+                else { alert('오답입니다!'); turnCount++; document.getElementById('quiz-modal').classList.remove('active'); loadCard(); }
+            };
+            optionsDiv.appendChild(btn);
+        });
+        document.getElementById('quiz-modal').classList.add('active');
     }
 
-    // 임기 만료 시 성향 분석 엔딩
-    function analyzeEnding() {
-        let title = "";
-        let desc = "";
-        let type = "";
+    function startClickBattle() {
+        document.getElementById('quiz-modal').classList.remove('active');
+        document.getElementById('battle-modal').classList.add('active');
+        battleClicks = 0; battleTimeLeft = 15; battleActive = true;
+        const timerInterval = setInterval(() => {
+            battleTimeLeft -= 0.1;
+            if (battleTimeLeft <= 0) { clearInterval(timerInterval); endClickBattle(); }
+            document.getElementById('timer-bar-fill').style.width = (battleTimeLeft / 15 * 100) + '%';
+            document.getElementById('battle-timer-text').textContent = Math.max(0, battleTimeLeft).toFixed(1) + 's';
+        }, 100);
+    }
 
-        // 우선순위 로직: 가장 특징적인 스탯을 기반으로 판정
-        if (stats.ethic >= 80 && stats.trust >= 60) {
-            title = "성공적인 통치";
-            type = "철인 통치자 (Philosopher King)";
-            desc = "당신은 도덕적 가치와 시민의 신뢰를 모두 지켰습니다. 역사는 당신을 가장 이상적인 지도자로 기억할 것입니다.";
-        } else if (stats.stable >= 80 && stats.ethic <= 40) {
-            title = "차가운 통치";
-            type = "효율적 독재자 (Leviathan)";
-            desc = "국가는 부강해지고 질서는 잡혔지만, 도덕과 인권은 희생되었습니다. 시민들은 당신을 두려워합니다.";
-        } else if (stats.trust >= 80 && stats.stable <= 40) {
-            title = "위태로운 인기";
-            type = "포퓰리스트 (Populist)";
-            desc = "시민들의 환심은 샀지만, 국가는 혼란스럽습니다. 당신의 정책은 인기영합적이었다는 비판을 받습니다.";
-        } else if (stats.intl >= 80 && stats.trust <= 40) {
-            title = "외부의 찬사";
-            type = "세계 시민 (Cosmopolitan)";
-            desc = "국제 사회에서는 칭송받지만, 정작 자국민들은 고통받았습니다. 밖에서만 좋은 지도자였습니다.";
-        } else {
-            title = "무난한 통치";
-            type = "실용주의자 (Pragmatist)";
-            desc = "큰 위기 없이 임기를 마쳤습니다. 특별한 철학보다는 상황에 맞춰 적절히 타협하며 국가를 이끌었습니다.";
+    function handleBattleClick() {
+        if (!battleActive) return;
+        battleClicks++; document.getElementById('battle-click-count').textContent = battleClicks;
+    }
+
+    function endClickBattle() {
+        battleActive = false; statAdjustmentPoints = Math.max(5, Math.floor(battleClicks / 4));
+        document.getElementById('battle-modal').classList.remove('active');
+        document.getElementById('event-modal').classList.add('active');
+        tempStats = JSON.parse(JSON.stringify(stats)); renderStatControls();
+    }
+
+    function renderStatControls() {
+        const container = document.getElementById('stat-control-container');
+        container.innerHTML = '';
+        document.getElementById('reward-info').innerHTML = `획득 포인트: <b>${statAdjustmentPoints}</b>`;
+        const statNames = {trust: '신뢰', ethic: '윤리', intl: '국제', stable: '안정'};
+        for (let key in tempStats) {
+            const div = document.createElement('div');
+            div.style.cssText = "display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px; margin-bottom:8px; border-radius:10px;";
+            div.innerHTML = `<span style="font-weight:bold; color:#aaa;">${statNames[key]}</span>
+                <div><button onclick="adjustTempStat('${key}', -1)">-</button>
+                <span style="display:inline-block; width:30px;">${tempStats[key]}</span>
+                <button onclick="adjustTempStat('${key}', 1)">+</button></div>`;
+            container.appendChild(div);
         }
-
-        showGameOver(title, desc, type);
     }
 
-    function showGameOver(title, msg, type) {
-        document.getElementById('end-title').textContent = title;
-        document.getElementById('ending-type').textContent = type;
-        document.getElementById('game-over-msg').textContent = msg;
-        document.getElementById('game-over').classList.add('active');
+    function adjustTempStat(key, amount) {
+        if (amount > 0 && statAdjustmentPoints > 0 && tempStats[key] < 100) { tempStats[key]++; statAdjustmentPoints--; }
+        else if (amount < 0 && tempStats[key] > 0) { tempStats[key]--; statAdjustmentPoints++; }
+        renderStatControls();
     }
 
-    function animateCardExit(direction, callback) {
-        const xOffset = direction === 'right' ? 1000 : -1000;
-        cardEl.style.transition = 'transform 0.4s ease-out';
-        cardEl.style.transform = `translate(${xOffset}px, 100px) rotate(${direction === 'right' ? 30 : -30}deg)`;
-        setTimeout(callback, 400);
+    function applyEventChanges() {
+        stats = JSON.parse(JSON.stringify(tempStats));
+        updateUI();
+        if (checkGameOver()) return;
+        document.getElementById('event-modal').classList.remove('active');
+        turnCount++; loadCard();
     }
 
-    // --- 드래그 이벤트 (PC/모바일 공용) ---
+    function showAchievements() {
+        const list = document.getElementById('ach-list'); list.innerHTML = '';
+        achievementData.forEach(ach => {
+            const isUnlocked = unlockedAchievements.includes(ach.id);
+            const item = document.createElement('div');
+            item.className = `achievement-item ${isUnlocked ? '' : 'locked'}`;
+            item.innerHTML = `<div class="ach-icon"><i class="fa-solid ${ach.icon}"></i></div><div><h4>${isUnlocked?ach.name:'???'}</h4><p>${isUnlocked?ach.desc:'???'}</p></div>`;
+            list.appendChild(item);
+        });
+        document.getElementById('achievement-modal').classList.add('active');
+    }
+
+    const cardObj = document.getElementById('card');
     let startX = 0, currentX = 0, isDragging = false;
-    
-    cardEl.addEventListener('mousedown', startDrag);
-    cardEl.addEventListener('touchstart', startDrag);
-    document.addEventListener('mousemove', moveDrag);
-    document.addEventListener('touchmove', moveDrag);
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-    
-    // 버튼 클릭 연결
-    document.getElementById('btn-left').onclick = () => handleChoice('left');
-    document.getElementById('btn-right').onclick = () => handleChoice('right');
+    function hStart(x) { if (document.querySelector('.modal.active')) return; isDragging = true; startX = x; cardObj.style.transition = 'none'; }
+    function hMove(x) {
+        if (!isDragging) return; currentX = x - startX;
+        cardObj.style.transform = `translate(${currentX}px, ${Math.abs(currentX)/15}px) rotate(${currentX/15}deg)`;
+        document.getElementById('overlay-right').style.opacity = currentX > 50 ? (currentX-50)/80 : 0;
+        document.getElementById('overlay-left').style.opacity = currentX < -50 ? (Math.abs(currentX)-50)/80 : 0;
+    }
+    function hEnd() {
+        if (!isDragging) return; isDragging = false;
+        if (currentX > 120) applyChoice('right');
+        else if (currentX < -120) applyChoice('left');
+        else { cardObj.style.transition = '0.5s'; cardObj.style.transform = `translate(0,0) rotate(0)`; }
+        currentX = 0;
+    }
+    cardObj.addEventListener('mousedown', e => hStart(e.clientX));
+    window.addEventListener('mousemove', e => hMove(e.clientX));
+    window.addEventListener('mouseup', hEnd);
+    cardObj.addEventListener('touchstart', e => hStart(e.touches[0].clientX));
+    window.addEventListener('touchmove', e => hMove(e.touches[0].clientX));
+    window.addEventListener('touchend', hEnd);
 
-    function startDrag(e) {
-        isDragging = true;
-        startX = (e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
-        cardEl.style.transition = 'none';
-    }
-    function moveDrag(e) {
-        if (!isDragging) return;
-        currentX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
-        const deltaX = currentX - startX;
-        cardEl.style.transform = `translate(${deltaX}px, 0) rotate(${deltaX * 0.05}deg)`;
-        
-        if (deltaX > 0) {
-            overlayYes.style.opacity = Math.min(deltaX / 100, 1);
-            overlayNo.style.opacity = 0;
-        } else {
-            overlayNo.style.opacity = Math.min(Math.abs(deltaX) / 100, 1);
-            overlayYes.style.opacity = 0;
-        }
-    }
-    function endDrag(e) {
-        if (!isDragging) return;
-        isDragging = false;
-        const deltaX = currentX - startX;
-        if (Math.abs(deltaX) > 100) handleChoice(deltaX > 0 ? 'right' : 'left');
-        else {
-            cardEl.style.transition = 'transform 0.3s';
-            cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
-            overlayYes.style.opacity = 0; overlayNo.style.opacity = 0;
-        }
-    }
-
-    // 게임 시작
-    initGame();
+    updateUI(); loadCard();
 </script>
 </body>
 </html>
